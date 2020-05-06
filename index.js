@@ -43,17 +43,54 @@ const onInput = async event => {
 
     option.classList.add('dropdown-item')
     option.innerHTML = `
-      <img src="${movie.Poster}" />
+      <img src="${imgSrc}" />
       ${movie.Title}
     `
+    option.addEventListener('click', () => {
+      dropdown.classList.remove('is-active')
+      input.value = movie.Title
+      onMovieSelect(movie)
+    })
+
     resultsWrapper.appendChild(option)
   }
 }
 
-input.addEventListener('input', debounce(onInput, 3000))
+input.addEventListener('input', debounce(onInput, 1000))
 
 document.addEventListener('click', event => {
   if (!root.contains(event.target)) {
     dropdown.classList.remove('is-active')
   }
 })
+
+const onMovieSelect = async movie => {
+  const response = await axios.get('http://www.omdbapi.com/', {
+    params: {
+      apikey: '37980481',
+      i: movie.imdbID
+    }
+  })
+
+  document.querySelector('#summary').innerHTML = movieTemplate(response.data)
+
+}
+
+const movieTemplate = movieDetail => {
+  return `
+    <article class="media">
+    <figure class="media-left">
+      <p class="image">
+        <img src="${movieDetail.Poster}" alt="a movie poster">
+      </p>
+    </figure>
+    <div class="media-content">
+      <div class="content">
+        <h1>${movieDetail.Title}</h1>
+        <h4>${movieDetail.Genre}</h4>
+        <p>${movieDetail.Plot}</p>
+      </div>
+    </div>
+    </article>
+  `
+}
